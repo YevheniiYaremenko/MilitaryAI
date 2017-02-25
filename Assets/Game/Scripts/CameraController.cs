@@ -14,6 +14,11 @@ public class CameraController : MonoBehaviour {
     {
         ChangeCameraPosition();
         ChangeCameraZoom();
+        
+        if (Input.GetMouseButtonUp(0))
+        {
+            OnClick();
+        }
     }
 
     void ChangeCameraZoom()
@@ -53,5 +58,20 @@ public class CameraController : MonoBehaviour {
             camPosition.y,
             Mathf.Clamp(camPosition.z + movement.z, -cameraPositionLimits.y / 2, cameraPositionLimits.y / 2));
         Camera.main.transform.position = camPosition;
+    }
+
+    void OnClick()
+    {
+        var hits = Physics.RaycastAll(Camera.main.ScreenPointToRay(Input.mousePosition));
+        if (hits.Length>0)
+        {
+            foreach(var hit in hits)
+            {
+                if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Floor"))
+                {
+                    MainController.Instance.SetPosition(hit.point);
+                }
+            }
+        }
     }
 }
