@@ -17,8 +17,11 @@ public class MainController : MonoBehaviour
         }
     }
 
+    [SerializeField] Transform target;
+
     public void SetPosition(Vector3 position)
     {
-        Commander.Instance.TakeOrder(position);
+        target.position = position;
+        Commander.Instance.TakeOrder(target.position);
     }
 }
