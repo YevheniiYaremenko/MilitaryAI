@@ -19,7 +19,7 @@ public class Commander : Character
 
     Vector3 target = Vector3.zero;
 
-    bool NearTarget { get { return Vector3.Distance(transform.position, target) < 1; } }
+    bool NearTarget { get { return Vector3.Distance(transform.position, target) <.5f; } }
 
     public void TakeOrder(Vector3 position)
     {
@@ -39,7 +39,10 @@ public class Commander : Character
                 transform.Rotate(Vector3.up * speedRotation * Time.deltaTime * side);
             }
 
-            transform.position = Vector3.MoveTowards(transform.position, transform.forward * 100, speedMoving * Time.deltaTime);
+            if (CanStep)
+            {
+                transform.position = Vector3.MoveTowards(transform.position, transform.forward * 100, speedMoving * Time.deltaTime);
+            }
         }
     }
 

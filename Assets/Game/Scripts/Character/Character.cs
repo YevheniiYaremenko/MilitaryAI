@@ -5,6 +5,7 @@ using UnityEngine;
 public class Character : MonoBehaviour
 {
     [SerializeField] protected Transform eyes;
+    [SerializeField] protected CapsuleCollider collider;
 
     [SerializeField] protected float speedMoving = 2;
     [SerializeField] protected float speedRotation = 2;
@@ -15,6 +16,21 @@ public class Character : MonoBehaviour
 
     public bool IsMoving { get { return direction != Vector3.zero; } }
     protected float VisionDistance { get { return maxVisionDistance * FindObjectOfType<Light>().intensity; } }
+    protected bool CanStep
+    {
+        get
+        {
+            var hit = LookForward();
+            return hit.collider==null || (hit.point-eyes.position).magnitude>1;
+        }
+    }
+
+    RaycastHit LookForward()
+    {
+        RaycastHit hit;
+        Physics.SphereCast(eyes.position, collider.radius, eyes.forward, out hit, VisionDistance);
+        return hit;
+    }
 
     private void Update()
     {
