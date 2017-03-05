@@ -35,3 +35,6 @@ sysinfo.txt
 #ProjectVersion.txt
 /ProjectSetting/ProjectVersion.txt
 ProjectSettings/ProjectVersion.txt
+
+# Lightmaps
+/Assets/Game/Scenes/TargetMoving/
