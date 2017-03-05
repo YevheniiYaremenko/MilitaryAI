@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using App.Map;
 
 public class Commander : Character
 {
@@ -17,8 +18,10 @@ public class Commander : Character
         }
     }
 
-    Vector3 target = Vector3.zero;
+    public CharacterState state;
 
+    Vector3 target = Vector3.zero;
+    Vector3 localTarget = Vector3.zero;
     bool NearTarget { get { return Vector3.Distance(transform.position, target) <.5f; } }
 
     public void TakeOrder(Vector3 position)
@@ -29,25 +32,75 @@ public class Commander : Character
 
     private void Update()
     {
-        if (!NearTarget)
+        if (NearTarget)
         {
-            var localTarget = GetWaypoint();
-            
-            if (Vector3.Angle(transform.forward,localTarget-transform.position)>speedRotation*Time.deltaTime)
-            {
-                int side = Vector3.Angle(-transform.right, localTarget - transform.position) < Vector3.Angle(transform.right, localTarget - transform.position) ? -1 : 1;
-                transform.Rotate(Vector3.up * speedRotation * Time.deltaTime * side);
-            }
+            return;
+        }
 
-            if (CanStep)
-            {
-                transform.position = Vector3.MoveTowards(transform.position, transform.forward * 100, speedMoving * Time.deltaTime);
-            }
+        switch (state)
+        {
+            case CharacterState.Idle:
+                FindPath();
+                break;
         }
     }
 
-    Vector3 GetWaypoint()
+    #region Path
+
+    void FindPath()
     {
-        return target;
+        state = CharacterState.Scanning;
+        StartCoroutine(ScanPosition());
     }
+
+    IEnumerator ScanPosition()
+    {
+        float angle = 0;
+
+        transform.eulerAngles -= Vector3.up * speedScaning * Time.deltaTime;
+        var lastHit = LookForward();
+        transform.eulerAngles += Vector3.up * speedScaning * Time.deltaTime;
+
+        while (angle<360)
+        {
+            angle += speedScaning * Time.deltaTime;
+            transform.eulerAngles += Vector3.up * speedScaning * Time.deltaTime;
+
+            var currentHit = LookForward();
+            if (lastHit.collider!=null && currentHit.collider==null)
+            {
+                GenerateWaypoint(lastHit);
+            }
+            if (lastHit.collider == null && currentHit.collider != null)
+            {
+                GenerateWaypoint(currentHit);
+            }
+            if (lastHit.collider!=null && currentHit.collider!=null && (lastHit.point-currentHit.point).magnitude>1)
+            {
+                GenerateWaypoint(currentHit);
+                GenerateWaypoint(lastHit);
+            }
+
+            lastHit = currentHit;
+            yield return new WaitForEndOfFrame();
+        }
+
+        Map.Instance.UpdateGraph();
+        yield return new WaitForSeconds(.5f);
+        FindOptimalTarget();
+    }
+
+    void FindOptimalTarget()
+    {
+        localTarget = Map.Instance.NearestTarget();
+    }
+
+    void GenerateWaypoint(RaycastHit hit)
+    {
+        Vector3 pos = hit.point + hit.normal.normalized;
+        pos.y = 0;
+        Map.Instance.AddWaypoint(pos);
+    }
+
+    #endregion Path
 }

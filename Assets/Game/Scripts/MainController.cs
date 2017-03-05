@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using App.Map;
 
 public class MainController : MonoBehaviour
 {
@@ -18,6 +19,16 @@ public class MainController : MonoBehaviour
     }
 
     [SerializeField] Transform target;
+    [SerializeField] Commander commander;
+    public Light sun;
+
+    public float characterRadius = .5f;
+
+    void Start()
+    {
+        Map.Instance.AddWaypoint(commander.GetComponent<Waypoint>());
+        Map.Instance.AddWaypoint(target.GetComponent<Waypoint>());
+    }
 
     public void SetPosition(Vector3 position)
     {
