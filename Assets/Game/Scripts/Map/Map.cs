@@ -132,7 +132,7 @@ namespace App.Map
         {
             Vector3 p1 = w1.Position + Vector3.up;
             Vector3 p2 = w2.Position + Vector3.up;
-            foreach (var hit in Physics.SphereCastAll(p1, MainController.Instance.characterRadius, p2 - p1, Commander.Instance.VisionDistance))
+            foreach (var hit in Physics.SphereCastAll(p1, MainController.Instance.characterRadius, (p2 - p1).normalized, Commander.Instance.VisionDistance))
             {
                 if (hit.collider!=null && hit.collider.gameObject.layer==LayerMask.NameToLayer("Obstacle"))
                 {
@@ -145,13 +145,6 @@ namespace App.Map
         Waypoint TryGoTo(Waypoint target)
         {
             var path = PathResolver.FindPath(Waypoints, Waypoints[0], target);
-            if (path!=null)
-            {
-                foreach (var node in path)
-                {
-                    Debug.Log(node.Position);
-                }
-            }
             return path != null ? path[0] : null;
         }
     }

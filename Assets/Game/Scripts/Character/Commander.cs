@@ -25,6 +25,7 @@ public class Commander : Character
 
     public void TakeOrder(Vector3 position)
     {
+        Debug.Log("New order: " + position);
         NewTarget(position);
     }
 
@@ -32,6 +33,7 @@ public class Commander : Character
     {
         if (NearTarget || state == CharacterState.Stop)
         {
+            Debug.Log("Target hs been found");
             return;
         }
 
