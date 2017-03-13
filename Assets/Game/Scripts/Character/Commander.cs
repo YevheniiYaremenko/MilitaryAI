@@ -20,21 +20,31 @@ public class Commander : Character
 
     public CharacterState state;
 
-    Vector3 target = Vector3.zero;
-    Vector3 localTarget = Vector3.zero;
-    bool NearTarget { get { return Vector3.Distance(transform.position, target) <.5f; } }
+    bool NearTarget { get { return (transform.position - target).magnitude <.5f; } }
+    bool NearLocalTarget { get { return localTarget!=null && (transform.position - localTarget.Position).magnitude < .5f; } }
 
     public void TakeOrder(Vector3 position)
     {
-        Debug.Log(string.Format("Commander: 'New target - {0}'", position));
-        target = position;
+        NewTarget(position);
     }
 
     private void Update()
     {
-        if (NearTarget)
+        if (NearTarget || state == CharacterState.Stop)
         {
             return;
+        }
+
+        if (localTarget != null)
+        {
+            if (!NearLocalTarget)
+            {
+                state = CharacterState.Moving;
+            }
+            else
+            {
+                OnLocalTargetAchieve();
+            }
         }
 
         switch (state)
@@ -42,65 +52,80 @@ public class Commander : Character
             case CharacterState.Idle:
                 FindPath();
                 break;
+            case CharacterState.Scanning:
+                break;
+            case CharacterState.Moving:
+                MoveToTarget();
+                break;
         }
     }
 
     #region Path
 
-    void FindPath()
+    protected override void FindPath()
     {
+        if (Map.Instance.FullMap)
+        {
+            state = CharacterState.Stop;
+            return;
+        }
+        base.FindPath();
+        if (localTarget==null)
+        {
+            StartCoroutine(ScanPosition());
+        }
+    }
+
+    protected override IEnumerator ScanPosition()
+    {
+        if (state == CharacterState.Scanning)
+        {
+            yield break;
+        }
+        
         state = CharacterState.Scanning;
+
+        yield return base.ScanPosition();
+
+        yield return new WaitForSeconds(1);
+        Map.Instance.UpdateGraph();
+        yield return new WaitForSeconds(.5f);
+        state = CharacterState.Idle;
+    }
+
+    void NewTarget(Vector3 target)
+    {
+        this.target = target;
+        localTarget = null;
         StartCoroutine(ScanPosition());
     }
 
-    IEnumerator ScanPosition()
+    void OnLocalTargetAchieve()
     {
-        float angle = 0;
-
-        transform.eulerAngles -= Vector3.up * speedScaning * Time.deltaTime;
-        var lastHit = LookForward();
-        transform.eulerAngles += Vector3.up * speedScaning * Time.deltaTime;
-
-        while (angle<360)
+        if (localTarget!=null && !localTarget.IsInvestigated)
         {
-            angle += speedScaning * Time.deltaTime;
-            transform.eulerAngles += Vector3.up * speedScaning * Time.deltaTime;
-
-            var currentHit = LookForward();
-            if (lastHit.collider!=null && currentHit.collider==null)
-            {
-                GenerateWaypoint(lastHit);
-            }
-            if (lastHit.collider == null && currentHit.collider != null)
-            {
-                GenerateWaypoint(currentHit);
-            }
-            if (lastHit.collider!=null && currentHit.collider!=null && (lastHit.point-currentHit.point).magnitude>1)
-            {
-                GenerateWaypoint(currentHit);
-                GenerateWaypoint(lastHit);
-            }
-
-            lastHit = currentHit;
-            yield return new WaitForEndOfFrame();
+            StartCoroutine(ScanPosition());
         }
-
-        Map.Instance.UpdateGraph();
-        yield return new WaitForSeconds(.5f);
-        FindOptimalTarget();
-    }
-
-    void FindOptimalTarget()
-    {
-        localTarget = Map.Instance.NearestTarget();
-    }
-
-    void GenerateWaypoint(RaycastHit hit)
-    {
-        Vector3 pos = hit.point + hit.normal.normalized;
-        pos.y = 0;
-        Map.Instance.AddWaypoint(pos);
     }
 
     #endregion Path
+
+    #region Moving
+
+    protected override void MoveToTarget()
+    {
+        base.MoveToTarget();
+
+        TryCutPath();
+    }
+
+    void TryCutPath()
+    {
+        if (Map.Instance.CanCutPath())
+        {
+            localTarget = Map.Instance.Target;
+        }
+    }
+
+    #endregion Moving
 }
