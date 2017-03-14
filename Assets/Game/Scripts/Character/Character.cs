@@ -133,7 +133,17 @@ public class Character : MonoBehaviour
     protected virtual void MoveToTarget()
     {
         azimuth.LookAt(localTarget.Position);
-        transform.eulerAngles = Vector3.up * Mathf.MoveTowards(transform.eulerAngles.y, azimuth.eulerAngles.y, speedRotation * Time.deltaTime);
+        float currRot = transform.localEulerAngles.y;
+        float azimuthRot = azimuth.eulerAngles.y;
+        if (Mathf.Max(azimuthRot,currRot)- Mathf.Min(azimuthRot, currRot)>180)
+        {
+            azimuthRot += azimuthRot < currRot ? 360 : -360;
+        }
+        else
+        {
+            azimuthRot += azimuthRot < currRot ? -360 : 0;
+        }
+        transform.eulerAngles = Vector3.up * Mathf.MoveTowards(currRot, azimuthRot, speedRotation * Time.deltaTime);
         if (CanStep)
         {
             transform.position = Vector3.MoveTowards(transform.position, transform.forward * 100, speedMoving * Time.deltaTime);
