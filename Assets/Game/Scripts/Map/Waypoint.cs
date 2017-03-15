@@ -48,22 +48,7 @@ namespace App.Map
 
         bool HasRelation(Waypoint target)
         {
-            Vector3 originPos = Position + Vector3.up;
-            Vector3 targetPos = target.Position + Vector3.up;
-            
-            var hits = Physics.SphereCastAll(originPos, MainController.Instance.characterRadius, targetPos - originPos,(targetPos - originPos).magnitude);
-            if (hits.Length==0)
-            {
-                return true;
-            }
-            foreach(var hit in hits)
-            {
-                if (hit.collider!=null && hit.collider.gameObject.layer==LayerMask.NameToLayer("Obstacle"))
-                {
-                    return false;
-                }
-            }
-            return true;
+            return Map.Instance.CanWalk(this, target);
         }
 
         void ShowRelations()

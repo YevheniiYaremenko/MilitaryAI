@@ -33,7 +33,6 @@ public class Commander : Character
     {
         if (NearTarget || state == CharacterState.Stop)
         {
-            Debug.Log("Target hs been found");
             return;
         }
 

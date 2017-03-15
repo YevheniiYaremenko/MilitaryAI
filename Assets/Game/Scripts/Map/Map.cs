@@ -52,12 +52,9 @@ namespace App.Map
 
         public void AddWaypoint(Vector3 waypointPosition)
         {
-            var w = Instantiate(waypointPrefab, waypointPosition, Quaternion.identity, transform);
-            if (Waypoints.Where(
-                            way => Waypoints.IndexOf(way) > 1
-                            && (way.Position-waypointPosition).magnitude<=minWaypointGraphDistance)
-                        .Count()==0)
+            if (Waypoints.Count(way=>(way.Position-waypointPosition).magnitude<=minWaypointGraphDistance)==0)
             {
+                var w = Instantiate(waypointPrefab, waypointPosition, Quaternion.identity, transform);
                 AddWaypoint(w.GetComponent<Waypoint>());
             }
         }
@@ -128,7 +125,7 @@ namespace App.Map
             return CanWalk(Waypoints[0], Waypoints[1]);
         }
 
-        bool CanWalk(Waypoint w1, Waypoint w2)
+        public bool CanWalk(Waypoint w1, Waypoint w2)
         {
             Vector3 p1 = w1.Position + Vector3.up;
             Vector3 p2 = w2.Position + Vector3.up;
@@ -139,7 +136,7 @@ namespace App.Map
                     return false;
                 }
             }
-            return true;
+            return (p1 - p2).magnitude < Commander.Instance.VisionDistance;
         }
         
         Waypoint TryGoTo(Waypoint target)
