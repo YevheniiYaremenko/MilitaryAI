@@ -35,4 +35,9 @@ public class MainController : MonoBehaviour
         target.position = position;
         Commander.Instance.TakeOrder(target.position);
     }
+
+    public void ResetScene()
+    {
+        Application.LoadLevel(0);
+    }
 }
