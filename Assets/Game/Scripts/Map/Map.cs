@@ -73,14 +73,15 @@ namespace App.Map
             }
         }
 
-        public Waypoint FindWayToTarget()
+        public List<Waypoint> FindWayToTarget()
         {
-            Waypoint localTarget;
+            List<Waypoint> path = new List<Waypoint>();
 
             if (CanCutPath())
             {
                 Debug.Log("See target.");
-                return Waypoints[1];
+                path.Add(Waypoints[1]);
+                return path;
             }
             else
             {
@@ -90,11 +91,11 @@ namespace App.Map
             //try find path to target
             if (Waypoints[1].Relations.Count>0)
             {
-                localTarget = TryGoTo(Waypoints[1]);
-                if (localTarget != null)
+                path = TryGoTo(Waypoints[1]);
+                if (path.Count>0)
                 {
-                    Debug.Log("Find path using map. Moving to target throught point "+localTarget.Position+"...");
-                    return localTarget;
+                    Debug.Log("Find path using map. Moving to target throught point "+path[0].Position+"...");
+                    return path;
                 }
             }
             Debug.Log("Don`t find path using map.Try to approach to the target...");
@@ -108,11 +109,11 @@ namespace App.Map
             {
                 foreach(var w in ways)
                 {
-                    localTarget = TryGoTo(w);
-                    if (localTarget != null)
+                    path = TryGoTo(w);
+                    if (path.Count>0)
                     {
-                        Debug.Log("Moving to nearest point to target ( throught point " + localTarget.Position + ")...");
-                        return localTarget;
+                        Debug.Log("Moving to nearest point to target ( throught point " + path[0].Position + ")...");
+                        return path;
                     }
                 }
                 Debug.Log("All points are discovered. Try to find new points...");
@@ -130,24 +131,24 @@ namespace App.Map
         {
             Vector3 p1 = w1.Position + Vector3.up;
             Vector3 p2 = w2.Position + Vector3.up;
-            foreach (var hit in Physics.SphereCastAll(p1, MainController.Instance.characterRadius, (p2 - p1).normalized, Commander.Instance.VisionDistance))
+            foreach (var hit in Physics.RaycastAll(p1, (p2 - p1).normalized, (p1 - p2).magnitude))
             {
                 if (hit.collider!=null && hit.collider.gameObject.layer==LayerMask.NameToLayer("Obstacle"))
                 {
                     return false;
                 }
             }
-            return (p1 - p2).magnitude < Commander.Instance.VisionDistance;
+            return true; //(p1 - p2).magnitude < Commander.Instance.VisionDistance;
         }
         
-        Waypoint TryGoTo(Waypoint target)
+        List<Waypoint> TryGoTo(Waypoint target)
         {
             var path = PathResolver.FindPath(Waypoints, Waypoints[0], target);
-            if (path!=null)
+            if (path.Count>0)
             {
                 ShowWay(path);
             }
-            return path != null ? path[0] : null;
+            return path;
         }
 
         void ShowWay(List<Waypoint> path)

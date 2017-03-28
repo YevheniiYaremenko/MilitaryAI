@@ -67,7 +67,7 @@ namespace App.Map
                     }
                 }
             }
-            return null;
+            return new List<Waypoint>();
         }
 
         static float RemainingLenght(Waypoint a1, Waypoint a2)

@@ -18,35 +18,24 @@ public class Commander : Character
         }
     }
 
+    bool NearTarget { get { return (transform.position - target).magnitude < .5f; } }
+    bool NearLocalTarget { get { return path.Count>0 && (transform.position - path[0].Position).magnitude < .5f; } }
+
     public CharacterState state;
-
-    bool NearTarget { get { return (transform.position - target).magnitude <.5f; } }
-    bool NearLocalTarget { get { return localTarget!=null && (transform.position - localTarget.Position).magnitude < .5f; } }
-
+    
     public void TakeOrder(Vector3 position)
     {
-        Debug.Log("New order: " + position);
         NewTarget(position);
     }
 
     private void Update()
     {
-        if (NearTarget || state == CharacterState.Stop)
+        if (state == CharacterState.Stop)
         {
             return;
         }
 
-        if (localTarget != null)
-        {
-            if (!NearLocalTarget)
-            {
-                state = CharacterState.Moving;
-            }
-            else
-            {
-                OnLocalTargetAchieve();
-            }
-        }
+        CheckPath();
 
         switch (state)
         {
@@ -57,6 +46,9 @@ public class Commander : Character
                 break;
             case CharacterState.Moving:
                 MoveToTarget();
+                break;
+            case CharacterState.Break:
+                OnPathpointAchieve();
                 break;
         }
     }
@@ -70,10 +62,16 @@ public class Commander : Character
             state = CharacterState.Stop;
             return;
         }
+        
         base.FindPath();
-        if (localTarget==null)
+
+        if (path.Count == 0)
         {
             StartCoroutine(ScanPosition());
+        }
+        else
+        {
+            state = CharacterState.Moving;
         }
     }
 
@@ -97,15 +95,39 @@ public class Commander : Character
     void NewTarget(Vector3 target)
     {
         this.target = target;
-        localTarget = null;
-        StartCoroutine(ScanPosition());
-    }
-
-    void OnLocalTargetAchieve()
-    {
-        if (localTarget!=null && !localTarget.IsInvestigated)
+        path.Clear();
+        TryCutPath();
+        if (path.Count==0)
         {
             StartCoroutine(ScanPosition());
+        }
+    }
+
+    void CheckPath()
+    {
+        if (path.Count > 0 && (transform.position - path[0].Position).magnitude < .5f)
+        {
+            state = CharacterState.Break;
+        }
+    }
+
+    void OnPathpointAchieve()
+    {
+        path.RemoveAt(0);
+        if (NearTarget)
+        {
+            state = CharacterState.Stop;
+        }
+        else
+        {
+            if (path.Count==0)
+            {
+                StartCoroutine(ScanPosition());
+            }
+            else
+            {
+                state = CharacterState.Moving;
+            }
         }
     }
 
@@ -124,7 +146,9 @@ public class Commander : Character
     {
         if (Map.Instance.CanCutPath())
         {
-            localTarget = Map.Instance.Target;
+            path.Clear();
+            path.Add(Map.Instance.Target);
+            state = CharacterState.Moving;
         }
     }
 

@@ -9,14 +9,14 @@ public enum CharacterState
     Idle,
     Moving,
     Scanning,
-    Stop
+    Stop,
+    Break
 }
 
 public class Character : MonoBehaviour
 {
     [SerializeField] protected Transform eyes;
     [SerializeField] protected CapsuleCollider collider;
-    [SerializeField] Transform azimuth;
 
     [SerializeField] protected float eyeAngleRange = 180;
     [SerializeField] protected float eyeAngleIncremention = 1;
@@ -30,7 +30,7 @@ public class Character : MonoBehaviour
     Vector3 lastPosition = Vector3.zero;
 
     protected Vector3 target = Vector3.zero;
-    protected Waypoint localTarget;
+    public List<Waypoint> path = new List<Waypoint>();
 
     public bool IsMoving { get { return direction != Vector3.zero; } }
     public float VisionDistance { get { return maxVisionDistance * MainController.Instance.sun.intensity; } }
@@ -46,7 +46,7 @@ public class Character : MonoBehaviour
 
     protected RaycastHit LookForward()
     {
-        return new List<RaycastHit>(Physics.SphereCastAll(eyes.position, collider.radius, eyes.forward, VisionDistance))
+        return new List<RaycastHit>(Physics.RaycastAll(eyes.position, eyes.forward, VisionDistance))
             .OrderBy(h => DistanceTo(h.point))
             .Where( h=> 
                 h.collider == null
@@ -64,7 +64,7 @@ public class Character : MonoBehaviour
     #region Path
     protected virtual void FindPath()
     {
-        localTarget = Map.Instance.FindWayToTarget();
+        path = Map.Instance.FindWayToTarget();
     }
 
     protected virtual IEnumerator ScanPosition()
@@ -108,9 +108,9 @@ public class Character : MonoBehaviour
             GenerateWaypoint(lastHit);
         }
 
-        if (localTarget!=null)
+        if (path.Count==1)
         {
-            localTarget.Investigate();
+            path[0].Investigate();
         }
     }
 
@@ -132,12 +132,12 @@ public class Character : MonoBehaviour
 
     protected virtual void MoveToTarget()
     {
-        azimuth.LookAt(localTarget.Position);
-        transform.eulerAngles = azimuth.eulerAngles;
-        if (CanStep)
-        {
-            transform.position = Vector3.MoveTowards(transform.position, transform.forward * 100, speedMoving * Time.deltaTime);
-        }
+        transform.LookAt(path[0].Position);
+        //if (CanStep)
+        //{
+        //    transform.position = Vector3.MoveTowards(transform.position, transform.forward * 100, speedMoving * Time.deltaTime);
+        //}
+        transform.position = Vector3.MoveTowards(transform.position, transform.forward*100, speedMoving * Time.deltaTime);
     }
 
     #endregion Moving
