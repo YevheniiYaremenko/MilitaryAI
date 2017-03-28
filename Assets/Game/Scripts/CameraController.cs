@@ -15,7 +15,7 @@ public class CameraController : MonoBehaviour {
         ChangeCameraPosition();
         ChangeCameraZoom();
         
-        if (Input.GetMouseButtonUp(0))
+        if (Input.GetMouseButtonUp(1))
         {
             OnClick();
         }
@@ -29,34 +29,12 @@ public class CameraController : MonoBehaviour {
 
     void ChangeCameraPosition()
     {
-        Vector3 movement = Vector3.zero;
-        Vector3 mousePosition = Input.mousePosition;
+        Vector2 movement = new Vector2(Input.GetAxis("Horizontal"),Input.GetAxis("Vertical")).normalized * cameraSpeed;
         var camPosition = Camera.main.transform.position;
-
-        if (mousePosition.x < pixelOffset)
-        {
-            movement.x = -1;
-        }
-        else if (mousePosition.x > Screen.width - pixelOffset)
-        {
-            movement.x = 1;
-        }
-
-        if (mousePosition.y < pixelOffset)
-        {
-            movement.z = -1;
-        }
-        else if (mousePosition.y > Screen.height - pixelOffset)
-        {
-            movement.z = 1;
-        }
-
-        movement = movement.normalized * cameraSpeed;
-
         camPosition = new Vector3(
             Mathf.Clamp(camPosition.x + movement.x, -cameraPositionLimits.x / 2, cameraPositionLimits.x / 2),
             camPosition.y,
-            Mathf.Clamp(camPosition.z + movement.z, -cameraPositionLimits.y / 2, cameraPositionLimits.y / 2));
+            Mathf.Clamp(camPosition.z + movement.y, -cameraPositionLimits.y / 2, cameraPositionLimits.y / 2));
         Camera.main.transform.position = camPosition;
     }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using App.Map;
+using UnityEngine.SceneManagement;
 
 public class MainController : MonoBehaviour
 {
@@ -36,8 +37,18 @@ public class MainController : MonoBehaviour
         Commander.Instance.TakeOrder(target.position);
     }
 
-    public void ResetScene()
+    public void Reset()
     {
-        Application.LoadLevel(0);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    public void LoadRambo()
+    {
+        SceneManager.LoadScene("Rambo");
+    }
+
+    public void LoadCommando()
+    {
+        SceneManager.LoadScene("Commando");
     }
 }

@@ -21,6 +21,7 @@ namespace App.Map
         }
         
         [SerializeField] GameObject waypointPrefab;
+        [SerializeField] GameObject pathpointPrefab;
 
         [SerializeField] float minWaypointGraphDistance = 1;
 
@@ -142,7 +143,23 @@ namespace App.Map
         Waypoint TryGoTo(Waypoint target)
         {
             var path = PathResolver.FindPath(Waypoints, Waypoints[0], target);
+            if (path!=null)
+            {
+                ShowWay(path);
+            }
             return path != null ? path[0] : null;
+        }
+
+        void ShowWay(List<Waypoint> path)
+        {
+            foreach(var flag in FindObjectsOfType<Pathpoint>())
+            {
+                DestroyImmediate(flag.gameObject);
+            }
+            foreach(var p in path)
+            {
+                Instantiate(pathpointPrefab, p.Position, Quaternion.identity);
+            }
         }
     }
 }
