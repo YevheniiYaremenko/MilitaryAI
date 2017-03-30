@@ -137,7 +137,7 @@ public class Character : MonoBehaviour
         //{
         //    transform.position = Vector3.MoveTowards(transform.position, transform.forward * 100, speedMoving * Time.deltaTime);
         //}
-        transform.position = Vector3.MoveTowards(transform.position, transform.forward*100, speedMoving * Time.deltaTime);
+        transform.position = Vector3.MoveTowards(transform.position, path[0].Position, speedMoving * Time.deltaTime);
     }
 
     #endregion Moving

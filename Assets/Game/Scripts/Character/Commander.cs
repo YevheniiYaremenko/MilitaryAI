@@ -18,8 +18,8 @@ public class Commander : Character
         }
     }
 
-    bool NearTarget { get { return (transform.position - target).magnitude < .5f; } }
-    bool NearLocalTarget { get { return path.Count>0 && (transform.position - path[0].Position).magnitude < .5f; } }
+    bool NearTarget { get { return (transform.position - target).magnitude < .3f; } }
+    bool NearLocalTarget { get { return path.Count>0 && (transform.position - path[0].Position).magnitude < .3f; } }
 
     public CharacterState state;
     
@@ -34,7 +34,7 @@ public class Commander : Character
         {
             return;
         }
-
+        
         CheckPath();
 
         switch (state)
@@ -88,6 +88,7 @@ public class Commander : Character
 
         yield return new WaitForSeconds(1);
         Map.Instance.UpdateGraph();
+        Map.Instance.InvestigatePosition(); 
         yield return new WaitForSeconds(.5f);
         state = CharacterState.Idle;
     }
@@ -105,7 +106,7 @@ public class Commander : Character
 
     void CheckPath()
     {
-        if (path.Count > 0 && (transform.position - path[0].Position).magnitude < .5f)
+        if (path.Count > 0 && (transform.position - path[0].Position).magnitude < .3f)
         {
             state = CharacterState.Break;
         }

@@ -162,5 +162,13 @@ namespace App.Map
                 Instantiate(pathpointPrefab, p.Position, Quaternion.identity);
             }
         }
+
+        public void InvestigatePosition()
+        {
+            foreach(var w in Waypoints.Where(w=>(w.Position-Waypoints[0].Position).magnitude<.3f))
+            {
+                w.Investigate();
+            }
+        }
     }
 }
