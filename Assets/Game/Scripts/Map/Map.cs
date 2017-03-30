@@ -67,9 +67,13 @@ namespace App.Map
 
         public void UpdateGraph()
         {
-            foreach(var w in Waypoints)
+            for (int i=0;i<Waypoints.Count; i++)
             {
-                w.UpdateRelations();
+                if (i == 1)
+                {
+                    continue;
+                }
+                Waypoints[i].UpdateRelations();
             }
         }
 
@@ -138,7 +142,7 @@ namespace App.Map
                     return false;
                 }
             }
-            return true; //(p1 - p2).magnitude < Commander.Instance.VisionDistance;
+            return (p1 - p2).magnitude < Commander.Instance.VisionDistance;
         }
         
         List<Waypoint> TryGoTo(Waypoint target)

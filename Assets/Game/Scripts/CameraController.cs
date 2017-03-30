@@ -19,6 +19,11 @@ public class CameraController : MonoBehaviour {
         {
             OnClick();
         }
+
+        if (Input.GetKey(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
     }
 
     void ChangeCameraZoom()

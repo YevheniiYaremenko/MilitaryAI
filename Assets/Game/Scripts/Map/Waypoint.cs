@@ -22,15 +22,21 @@ namespace App.Map
                 GetComponentInChildren<MeshRenderer>().material.SetColor("_Color", viewerColor);
                 relationViewer.material.SetColor("_Color", viewerColor);
             }
+            Relations = new List<Waypoint>();
         }
 
         public void UpdateRelations()
         {
             Relations = new List<Waypoint>();
             Relations.Clear();
-            foreach (var w in Map.Instance.Waypoints)
+            for (int i=0;i< Map.Instance.Waypoints.Count;i++)
             {
-                if (w==this)
+                if (i==1)
+                {
+                    continue;
+                }
+                var w = Map.Instance.Waypoints[i];
+                if (w == this)
                 {
                     continue;
                 }
