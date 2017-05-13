@@ -28,6 +28,7 @@ public class Character : MonoBehaviour
 
     [HideInInspector] public Vector3 direction;
     Vector3 lastPosition = Vector3.zero;
+    protected float distance = 0;
 
     protected Vector3 target = Vector3.zero;
     public List<Waypoint> path = new List<Waypoint>();
@@ -137,6 +138,7 @@ public class Character : MonoBehaviour
         //{
         //    transform.position = Vector3.MoveTowards(transform.position, transform.forward * 100, speedMoving * Time.deltaTime);
         //}
+        distance += speedMoving * Time.deltaTime;
         transform.position = Vector3.MoveTowards(transform.position, path[0].Position, speedMoving * Time.deltaTime);
     }
 

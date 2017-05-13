@@ -123,7 +123,7 @@ namespace App.Map
                 Debug.Log("All points are discovered. Try to find new points...");
             }
 
-            return null;
+            return path;
         }
 
         public bool CanCutPath()
