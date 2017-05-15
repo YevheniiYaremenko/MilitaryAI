@@ -42,6 +42,11 @@ public class MainController : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
+    public void LoadPoligon(string poligonName)
+    {
+        SceneManager.LoadScene(poligonName);
+    }
+
     public void LoadRambo()
     {
         SceneManager.LoadScene("Rambo");
